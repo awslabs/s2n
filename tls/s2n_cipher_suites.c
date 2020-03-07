@@ -14,6 +14,7 @@
  */
 
 #include <string.h>
+#include <stdbool.h>
 
 #include <openssl/crypto.h>
 
@@ -1113,9 +1114,17 @@ static int s2n_set_cipher_as_server(struct s2n_connection *conn, uint8_t * wire,
     const struct s2n_cipher_preferences *cipher_preferences;
     GUARD(s2n_connection_get_cipher_preferences(conn, &cipher_preferences));
 
+    uint8_t preference_count = cipher_preferences->count;
+    struct s2n_cipher_suite **our_suites = cipher_preferences->suites;
+    if (cipher_preferences->unaccelerated_aes_detection_enabled &&
+            s2n_wire_ciphers_detect_unaccelerated_aes(wire, count)) {
+        preference_count = cipher_preferences->unaccelerated_aes_suites_count;
+        our_suites = cipher_preferences->unaccelerated_aes_suites;
+    }
+
     /* s2n supports only server order */
-    for (int i = 0; i < cipher_preferences->count; i++) {
-        const uint8_t *ours = cipher_preferences->suites[i]->iana_value;
+    for (int i = 0; i < preference_count; i++) {
+        const uint8_t *ours = our_suites[i]->iana_value;
 
         if (s2n_wire_ciphers_contain(ours, wire, count, cipher_suite_len)) {
             /* We have a match */
@@ -1180,3 +1189,31 @@ int s2n_set_cipher_as_tls_server(struct s2n_connection *conn, uint8_t * wire, ui
 {
     return s2n_set_cipher_as_server(conn, wire, count, S2N_TLS_CIPHER_SUITE_LEN);
 }
+
+static const uint8_t CHACHA20_CIPHERS[][S2N_TLS_CIPHER_SUITE_LEN] = {
+    { TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256 },
+    { TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256 },
+    { TLS_CHACHA20_POLY1305_SHA256 },
+};
+
+bool s2n_wire_ciphers_detect_unaccelerated_aes(uint8_t *wire, uint16_t count)
+{
+    if (count == 0) {
+        return false;
+    }
+
+   /* It may better here to run a full negotiation with the peer's wire ciphers as
+    * the preference in cases where the peer prefixes their preferences with
+    * code points we don't understand(GREASE values, experimental stuff, etc), but is still
+    * prioritizing ChaCha20 higher relative to AES.
+    * For now, we'll just look at the very first cipher offered.
+    */
+    for (int i = 0; i < s2n_array_len(CHACHA20_CIPHERS); i++) {
+        if (s2n_wire_ciphers_contain(CHACHA20_CIPHERS[i], wire, 1, S2N_TLS_CIPHER_SUITE_LEN)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+

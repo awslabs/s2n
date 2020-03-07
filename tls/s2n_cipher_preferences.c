@@ -62,6 +62,63 @@ const struct s2n_kem *pq_kems_sike_r2r1[2] = {
 
 #endif
 
+/* A "normal" prefernce list for peers that probably have AES acceleration. */
+struct s2n_cipher_suite *cipher_suites_20200308[] = {
+    &s2n_tls13_aes_128_gcm_sha256,
+    &s2n_tls13_aes_256_gcm_sha384,
+    &s2n_tls13_chacha20_poly1305_sha256,
+    &s2n_ecdhe_ecdsa_with_chacha20_poly1305_sha256,
+    &s2n_ecdhe_rsa_with_chacha20_poly1305_sha256,
+    &s2n_ecdhe_ecdsa_with_aes_128_gcm_sha256,
+    &s2n_ecdhe_rsa_with_aes_128_gcm_sha256,
+    &s2n_ecdhe_ecdsa_with_aes_256_gcm_sha384,
+    &s2n_ecdhe_rsa_with_aes_256_gcm_sha384,
+    &s2n_ecdhe_ecdsa_with_chacha20_poly1305_sha256,
+    &s2n_ecdhe_rsa_with_chacha20_poly1305_sha256,
+    &s2n_ecdhe_ecdsa_with_aes_128_cbc_sha,
+    &s2n_ecdhe_rsa_with_aes_128_cbc_sha,
+    &s2n_ecdhe_ecdsa_with_aes_128_cbc_sha256,
+    &s2n_ecdhe_rsa_with_aes_128_cbc_sha256,
+    &s2n_ecdhe_ecdsa_with_aes_256_cbc_sha,
+    &s2n_ecdhe_rsa_with_aes_256_cbc_sha,
+    &s2n_rsa_with_aes_128_gcm_sha256,
+    &s2n_rsa_with_aes_128_cbc_sha256,
+    &s2n_rsa_with_aes_128_cbc_sha
+};
+
+/* A preference list when the peer is detected to not have AES acceleration. */
+struct s2n_cipher_suite* cipher_suites_20200308_no_hardware_aes[] = {
+    &s2n_tls13_chacha20_poly1305_sha256,
+    &s2n_tls13_aes_128_gcm_sha256,
+    &s2n_tls13_aes_256_gcm_sha384,
+    &s2n_ecdhe_ecdsa_with_chacha20_poly1305_sha256,
+    &s2n_ecdhe_rsa_with_chacha20_poly1305_sha256,
+    &s2n_ecdhe_ecdsa_with_aes_128_gcm_sha256,
+    &s2n_ecdhe_rsa_with_aes_128_gcm_sha256,
+    &s2n_ecdhe_ecdsa_with_aes_256_gcm_sha384,
+    &s2n_ecdhe_rsa_with_aes_256_gcm_sha384,
+    &s2n_ecdhe_ecdsa_with_aes_128_cbc_sha,
+    &s2n_ecdhe_rsa_with_aes_128_cbc_sha,
+    &s2n_ecdhe_ecdsa_with_aes_128_cbc_sha256,
+    &s2n_ecdhe_rsa_with_aes_128_cbc_sha256,
+    &s2n_ecdhe_ecdsa_with_aes_256_cbc_sha,
+    &s2n_ecdhe_rsa_with_aes_256_cbc_sha,
+    &s2n_rsa_with_aes_128_gcm_sha256,
+    &s2n_rsa_with_aes_128_cbc_sha256,
+    &s2n_rsa_with_aes_128_cbc_sha
+};
+
+const struct s2n_cipher_preferences cipher_preferences_20200308 = {
+    .count = s2n_array_len(cipher_suites_20200308),
+    .suites = cipher_suites_20200308,
+    .unaccelerated_aes_detection_enabled = 1,
+    .unaccelerated_aes_suites_count = s2n_array_len(cipher_suites_20200308_no_hardware_aes),
+    .unaccelerated_aes_suites = cipher_suites_20200308_no_hardware_aes,
+    .minimum_protocol_version = S2N_TLS10,
+    .kem_count = 0,
+    .kems = NULL,
+};
+
 /* s2n's list of cipher suites, in order of preferences, as of 2019-08-01 */
 struct s2n_cipher_suite *cipher_suites_20190801[] = {
     S2N_TLS13_CIPHER_SUITES_20190801,
@@ -82,6 +139,7 @@ const struct s2n_cipher_preferences cipher_preferences_20190801 = {
     .minimum_protocol_version = S2N_TLS10,
     .kem_count = 0,
     .kems = NULL,
+    .unaccelerated_aes_detection_enabled = 0,
 };
 
 /* s2n's list of cipher suites, in order of preference, as of 2014-06-01 */
@@ -102,6 +160,7 @@ const struct s2n_cipher_preferences cipher_preferences_20140601 = {
     .minimum_protocol_version = S2N_SSLv3,
     .kem_count = 0,
     .kems = NULL,
+    .unaccelerated_aes_detection_enabled = 0,
 };
 
 /* Disable SSLv3 due to POODLE */
@@ -111,6 +170,7 @@ const struct s2n_cipher_preferences cipher_preferences_20141001 = {
     .minimum_protocol_version = S2N_TLS10,
     .kem_count = 0,
     .kems = NULL,
+    .unaccelerated_aes_detection_enabled = 0,
 };
 
 /* Disable RC4 */
@@ -129,6 +189,7 @@ const struct s2n_cipher_preferences cipher_preferences_20150202 = {
     .minimum_protocol_version = S2N_TLS10,
     .kem_count = 0,
     .kems = NULL,
+    .unaccelerated_aes_detection_enabled = 0,
 };
 
 /* Support AES-GCM modes */
@@ -149,6 +210,7 @@ const struct s2n_cipher_preferences cipher_preferences_20150214 = {
     .minimum_protocol_version = S2N_TLS10,
     .kem_count = 0,
     .kems = NULL,
+    .unaccelerated_aes_detection_enabled = 0,
 };
 
 /* Make a CBC cipher #1 to avoid negotiating GCM with buggy Java clients */
@@ -174,6 +236,7 @@ const struct s2n_cipher_preferences cipher_preferences_20160411 = {
     .minimum_protocol_version = S2N_TLS10,
     .kem_count = 0,
     .kems = NULL,
+    .unaccelerated_aes_detection_enabled = 0,
 };
 
 /* Use ECDHE instead of plain DHE. Prioritize ECDHE in favour of non ECDHE; GCM in favour of CBC; AES128 in favour of AES256. */
@@ -196,6 +259,7 @@ const struct s2n_cipher_preferences cipher_preferences_20150306 = {
     .minimum_protocol_version = S2N_TLS10,
     .kem_count = 0,
     .kems = NULL,
+    .unaccelerated_aes_detection_enabled = 0,
 };
 
 struct s2n_cipher_suite *cipher_suites_20160804[] = {
@@ -220,6 +284,7 @@ const struct s2n_cipher_preferences cipher_preferences_20160804 = {
     .minimum_protocol_version = S2N_TLS10,
     .kem_count = 0,
     .kems = NULL,
+    .unaccelerated_aes_detection_enabled = 0,
 };
 
 struct s2n_cipher_suite *cipher_suites_20160824[] = {
@@ -239,6 +304,7 @@ const struct s2n_cipher_preferences cipher_preferences_20160824 = {
     .minimum_protocol_version = S2N_TLS10,
     .kem_count = 0,
     .kems = NULL,
+    .unaccelerated_aes_detection_enabled = 0,
 };
 
 /* Add ChaCha20 suite */
@@ -260,6 +326,7 @@ const struct s2n_cipher_preferences cipher_preferences_20170210 = {
     .minimum_protocol_version = S2N_TLS10,
     .kem_count = 0,
     .kems = NULL,
+    .unaccelerated_aes_detection_enabled = 0,
 };
 
 /* Same as 20160411, but with ChaCha20 added as 1st in Preference List */
@@ -286,6 +353,7 @@ const struct s2n_cipher_preferences cipher_preferences_20190122 = {
     .minimum_protocol_version = S2N_TLS10,
     .kem_count = 0,
     .kems = NULL,
+    .unaccelerated_aes_detection_enabled = 0,
 };
 
 /* Same as 20160804, but with ChaCha20 added as 2nd in Preference List */
@@ -312,6 +380,7 @@ const struct s2n_cipher_preferences cipher_preferences_20190121 = {
     .minimum_protocol_version = S2N_TLS10,
     .kem_count = 0,
     .kems = NULL,
+    .unaccelerated_aes_detection_enabled = 0,
 };
 
 /* Same as 20160411, but with ChaCha20 in 3rd Place after CBC and GCM */
@@ -338,6 +407,7 @@ const struct s2n_cipher_preferences cipher_preferences_20190120 = {
     .minimum_protocol_version = S2N_TLS10,
     .kem_count = 0,
     .kems = NULL,
+    .unaccelerated_aes_detection_enabled = 0,
 };
 
 /* Preferences optimized for interop, includes ECDSA priortitized. DHE and 3DES are added(at the lowest preference). */
@@ -375,6 +445,7 @@ const struct s2n_cipher_preferences cipher_preferences_20190214 = {
     .minimum_protocol_version = S2N_TLS10,
     .kem_count = 0,
     .kems = NULL,
+    .unaccelerated_aes_detection_enabled = 0,
 };
 
 struct s2n_cipher_suite *cipher_suites_null[] = {
@@ -387,6 +458,7 @@ const struct s2n_cipher_preferences cipher_preferences_null = {
     .minimum_protocol_version = S2N_TLS10,
     .kem_count = 0,
     .kems = NULL,
+    .unaccelerated_aes_detection_enabled = 0,
 };
 
 /* Preferences optimized for interop. DHE and 3DES are added(at the lowest preference). */
@@ -418,6 +490,7 @@ const struct s2n_cipher_preferences cipher_preferences_20170328 = {
     .minimum_protocol_version = S2N_TLS10,
     .kem_count = 0,
     .kems = NULL,
+    .unaccelerated_aes_detection_enabled = 0,
 };
 
 /* Preferences optimized for FIPS compatibility. */
@@ -441,6 +514,7 @@ const struct s2n_cipher_preferences cipher_preferences_20170405 = {
     .minimum_protocol_version = S2N_TLS10,
     .kem_count = 0,
     .kems = NULL,
+    .unaccelerated_aes_detection_enabled = 0,
 };
 
 /* Equivalent to cipher_suite_20160411 with 3DES removed.
@@ -466,6 +540,7 @@ const struct s2n_cipher_preferences cipher_preferences_20170718 = {
     .minimum_protocol_version = S2N_TLS10,
     .kem_count = 0,
     .kems = NULL,
+    .unaccelerated_aes_detection_enabled = 0,
 };
 
 struct s2n_cipher_suite *cipher_suites_elb_security_policy_2015_04[] = {
@@ -496,6 +571,7 @@ const struct s2n_cipher_preferences elb_security_policy_2015_04 = {
     .minimum_protocol_version = S2N_TLS10,
     .kem_count = 0,
     .kems = NULL,
+    .unaccelerated_aes_detection_enabled = 0,
 };
 
 struct s2n_cipher_suite *cipher_suites_elb_security_policy_2016_08[] = {
@@ -525,6 +601,7 @@ const struct s2n_cipher_preferences elb_security_policy_2016_08 = {
     .minimum_protocol_version = S2N_TLS10,
     .kem_count = 0,
     .kems = NULL,
+    .unaccelerated_aes_detection_enabled = 0,
 };
 
 struct s2n_cipher_suite *cipher_suites_elb_security_policy_tls_1_2_2017_01[] = {
@@ -548,6 +625,7 @@ const struct s2n_cipher_preferences elb_security_policy_tls_1_2_2017_01 = {
     .minimum_protocol_version = S2N_TLS12,
     .kem_count = 0,
     .kems = NULL,
+    .unaccelerated_aes_detection_enabled = 0,
 };
 
 struct s2n_cipher_suite *cipher_suites_elb_security_policy_tls_1_1_2017_01[] = {
@@ -577,6 +655,7 @@ const struct s2n_cipher_preferences elb_security_policy_tls_1_1_2017_01 = {
     .minimum_protocol_version = S2N_TLS11,
     .kem_count = 0,
     .kems = NULL,
+    .unaccelerated_aes_detection_enabled = 0,
 };
 
 struct s2n_cipher_suite *cipher_suites_elb_security_policy_tls_1_2_ext_2018_06[] = {
@@ -606,6 +685,7 @@ const struct s2n_cipher_preferences elb_security_policy_tls_1_2_ext_2018_06 = {
     .minimum_protocol_version = S2N_TLS12,
     .kem_count = 0,
     .kems = NULL,
+    .unaccelerated_aes_detection_enabled = 0,
 };
 
 struct s2n_cipher_suite *cipher_suites_elb_security_policy_fs_2018_06[] = {
@@ -629,6 +709,7 @@ const struct s2n_cipher_preferences elb_security_policy_fs_2018_06 = {
     .minimum_protocol_version = S2N_TLS10,
     .kem_count = 0,
     .kems = NULL,
+    .unaccelerated_aes_detection_enabled = 0,
 };
 
 struct s2n_cipher_suite *cipher_suites_elb_security_policy_fs_1_2_2019_08[] = {
@@ -652,6 +733,7 @@ const struct s2n_cipher_preferences elb_security_policy_fs_1_2_2019_08 = {
     .minimum_protocol_version = S2N_TLS12,
     .kem_count = 0,
     .kems = NULL,
+    .unaccelerated_aes_detection_enabled = 0,
 };
 
 struct s2n_cipher_suite *cipher_suites_elb_security_policy_fs_1_1_2019_08[] = {
@@ -675,6 +757,7 @@ const struct s2n_cipher_preferences elb_security_policy_fs_1_1_2019_08 = {
     .minimum_protocol_version = S2N_TLS11,
     .kem_count = 0,
     .kems = NULL,
+    .unaccelerated_aes_detection_enabled = 0,
 };
 
 struct s2n_cipher_suite *cipher_suites_elb_security_policy_fs_1_2_Res_2019_08[] = {
@@ -694,6 +777,7 @@ const struct s2n_cipher_preferences elb_security_policy_fs_1_2_Res_2019_08 = {
     .minimum_protocol_version = S2N_TLS12,
     .kem_count = 0,
     .kems = NULL,
+    .unaccelerated_aes_detection_enabled = 0,
 };
 
 struct s2n_cipher_suite *cipher_suites_cloudfront_upstream[] = {
@@ -724,6 +808,7 @@ const struct s2n_cipher_preferences cipher_preferences_cloudfront_upstream = {
     .minimum_protocol_version = S2N_SSLv3,
     .kem_count = 0,
     .kems = NULL,
+    .unaccelerated_aes_detection_enabled = 0,
 };
 
 struct s2n_cipher_suite *cipher_suites_cloudfront_ssl_v_3[] = {
@@ -748,6 +833,7 @@ const struct s2n_cipher_preferences cipher_preferences_cloudfront_ssl_v_3 = {
     .minimum_protocol_version = S2N_SSLv3,
     .kem_count = 0,
     .kems = NULL,
+    .unaccelerated_aes_detection_enabled = 0,
 };
 
 struct s2n_cipher_suite *cipher_suites_cloudfront_tls_1_0_2014[] = {
@@ -771,6 +857,7 @@ const struct s2n_cipher_preferences cipher_preferences_cloudfront_tls_1_0_2014 =
     .minimum_protocol_version = S2N_TLS10,
     .kem_count = 0,
     .kems = NULL,
+    .unaccelerated_aes_detection_enabled = 0,
 };
 
 struct s2n_cipher_suite *cipher_suites_cloudfront_tls_1_0_2016[] = {
@@ -793,6 +880,7 @@ const struct s2n_cipher_preferences cipher_preferences_cloudfront_tls_1_0_2016 =
     .minimum_protocol_version = S2N_TLS10,
     .kem_count = 0,
     .kems = NULL,
+    .unaccelerated_aes_detection_enabled = 0,
 };
 
 struct s2n_cipher_suite *cipher_suites_cloudfront_tls_1_1_2016[] = {
@@ -815,6 +903,7 @@ const struct s2n_cipher_preferences cipher_preferences_cloudfront_tls_1_1_2016 =
     .minimum_protocol_version = S2N_TLS11,
     .kem_count = 0,
     .kems = NULL,
+    .unaccelerated_aes_detection_enabled = 0,
 };
 
 struct s2n_cipher_suite *cipher_suites_cloudfront_tls_1_2_2018[] = {
@@ -833,6 +922,7 @@ const struct s2n_cipher_preferences cipher_preferences_cloudfront_tls_1_2_2018 =
     .minimum_protocol_version = S2N_TLS12,
     .kem_count = 0,
     .kems = NULL,
+    .unaccelerated_aes_detection_enabled = 0,
 };
 
 struct s2n_cipher_suite *cipher_suites_cloudfront_tls_1_2_2019[] = {
@@ -848,6 +938,7 @@ const struct s2n_cipher_preferences cipher_preferences_cloudfront_tls_1_2_2019 =
     .minimum_protocol_version = S2N_TLS12,
     .kem_count = 0,
     .kems = NULL,
+    .unaccelerated_aes_detection_enabled = 0,
 };
 
 struct s2n_cipher_suite *cipher_suites_kms_tls_1_0_2018_10[] = {
@@ -869,6 +960,7 @@ const struct s2n_cipher_preferences cipher_preferences_kms_tls_1_0_2018_10 = {
     .minimum_protocol_version = S2N_TLS10,
     .kem_count = 0,
     .kems = NULL,
+    .unaccelerated_aes_detection_enabled = 0,
 };
 
 #if !defined(S2N_NO_PQ)
@@ -895,6 +987,7 @@ const struct s2n_cipher_preferences cipher_preferences_kms_pq_tls_1_0_2019_06 = 
     .minimum_protocol_version = S2N_TLS10,
     .kem_count = s2n_array_len(pq_kems_r1),
     .kems = pq_kems_r1,
+    .unaccelerated_aes_detection_enabled = 0,
 };
 
 /* Includes round 1 and round 2 PQ KEM params. The cipher suite list is the same
@@ -905,6 +998,7 @@ const struct s2n_cipher_preferences cipher_preferences_kms_pq_tls_1_0_2020_02 = 
     .minimum_protocol_version = S2N_TLS10,
     .kem_count = s2n_array_len(pq_kems_r2r1),
     .kems = pq_kems_r2r1,
+    .unaccelerated_aes_detection_enabled = 0,
 };
 
 struct s2n_cipher_suite *cipher_suites_pq_sike_test_tls_1_0_2019_11[] = {
@@ -928,6 +1022,7 @@ const struct s2n_cipher_preferences cipher_preferences_pq_sike_test_tls_1_0_2019
     .minimum_protocol_version = S2N_TLS10,
     .kem_count = s2n_array_len(pq_kems_sike_r1),
     .kems = pq_kems_sike_r1,
+    .unaccelerated_aes_detection_enabled = 0,
 };
 
 /* Includes only SIKE round 1 and round 2 (for integration tests). The cipher suite list
@@ -938,6 +1033,7 @@ const struct s2n_cipher_preferences cipher_preferences_pq_sike_test_tls_1_0_2020
         .minimum_protocol_version = S2N_TLS10,
         .kem_count = s2n_array_len(pq_kems_sike_r2r1),
         .kems = pq_kems_sike_r2r1,
+        .unaccelerated_aes_detection_enabled = 0,
 };
 
 #endif
@@ -957,6 +1053,7 @@ const struct s2n_cipher_preferences cipher_preferences_kms_fips_tls_1_2_2018_10 
     .minimum_protocol_version = S2N_TLS12,
     .kem_count = 0,
     .kems = NULL,
+    .unaccelerated_aes_detection_enabled = 0,
 };
 
 struct {
@@ -1012,6 +1109,7 @@ struct {
     { .version="20190120", .preferences=&cipher_preferences_20190120, .ecc_extension_required=0, .pq_kem_extension_required=0},
     { .version="20190121", .preferences=&cipher_preferences_20190121, .ecc_extension_required=0, .pq_kem_extension_required=0},
     { .version="20190122", .preferences=&cipher_preferences_20190122, .ecc_extension_required=0, .pq_kem_extension_required=0},
+    { .version="20200308", .preferences=&cipher_preferences_20200308, .ecc_extension_required=0, .pq_kem_extension_required=0},
     { .version="test_all", .preferences=&cipher_preferences_test_all, .ecc_extension_required=0, .pq_kem_extension_required=0},
     { .version="test_all_fips", .preferences=&cipher_preferences_test_all_fips, .ecc_extension_required=0, .pq_kem_extension_required=0},
     { .version="test_all_ecdsa", .preferences=&cipher_preferences_test_all_ecdsa, .ecc_extension_required=0, .pq_kem_extension_required=0},
