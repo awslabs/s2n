@@ -28,6 +28,7 @@
 #include "openssl/opensslv.h"
 
 #include "pq-crypto/s2n_pq.h"
+static int s2n_initialized = 0;
 
 static void s2n_cleanup_atexit(void);
 
@@ -38,6 +39,14 @@ unsigned long s2n_get_openssl_version(void)
 
 int s2n_init(void)
 {
+    /* s2n has already been initialized be a previous call to setup the library.
+     * This can occur when multiple components within a process have a dependency on s2n
+     * and try to initialize the library on process start.
+     */
+    if (s2n_initialized) {
+        return 0;
+    }
+
     GUARD_POSIX(s2n_fips_init());
     GUARD_POSIX(s2n_mem_init());
     GUARD_AS_POSIX(s2n_rand_init());
@@ -50,9 +59,10 @@ int s2n_init(void)
     S2N_ERROR_IF(atexit(s2n_cleanup_atexit) != 0, S2N_ERR_ATEXIT);
 
     if (getenv("S2N_PRINT_STACKTRACE")) {
-      s2n_stack_traces_enabled_set(true);
+        s2n_stack_traces_enabled_set(true);
     }
 
+    s2n_initialized = 1;
     return 0;
 }
 
@@ -61,6 +71,10 @@ int s2n_cleanup(void)
     /* s2n_cleanup is supposed to be called from each thread before exiting,
      * so ensure that whatever clean ups we have here are thread safe */
     GUARD_AS_POSIX(s2n_rand_cleanup_thread());
+    /* This isn't strictly necessary as it isn't currently possible to call s2n_init() again after a call to
+     * s2n_cleanup().
+     */
+    s2n_initialized = 0;
     return 0;
 }
 
