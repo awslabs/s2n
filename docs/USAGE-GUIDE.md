@@ -372,7 +372,7 @@ Example:
 ```
 if (s2n_config_set_cipher_preferences(config, prefs) < 0) {
     printf("Setting cipher prefs failed! %s : %s", s2n_strerror(s2n_errno, "EN"), s2n_strerror_debug(s2n_errno, "EN"));
-    return -1;
+    return S2N_FAILURE;
 }
 ```
 
@@ -1091,7 +1091,6 @@ is supported by a given cipher preferences. It returns
 -  1 if the connection satisfies the cipher suite 
 -  0 if it does not
 - -1 on any other errors
-
 
 ### s2n\_connection\_set\_cipher\_preferences
 

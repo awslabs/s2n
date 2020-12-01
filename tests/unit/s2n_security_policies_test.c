@@ -274,45 +274,33 @@ int main(int argc, char **argv)
     {
         struct s2n_config *config = s2n_config_new();
 
-        EXPECT_SUCCESS(s2n_config_set_cipher_preferences(config, "default"));
+        EXPECT_SUCCESS(s2n_config_set_security_policy(config, S2N_SECURITY_POLICY_DEFAULT));
         EXPECT_EQUAL(config->security_policy, &security_policy_20170210);
         EXPECT_EQUAL(config->security_policy->cipher_preferences, &cipher_preferences_20170210);
         EXPECT_EQUAL(config->security_policy->kem_preferences, &kem_preferences_null);
         EXPECT_EQUAL(config->security_policy->signature_preferences, &s2n_signature_preferences_20140601);
         EXPECT_EQUAL(config->security_policy->ecc_preferences, &s2n_ecc_preferences_20140601);
 
-        EXPECT_SUCCESS(s2n_config_set_cipher_preferences(config, "20170210"));
+        EXPECT_SUCCESS(s2n_config_set_security_policy(config, S2N_SECURITY_POLICY_20170210));
         EXPECT_EQUAL(config->security_policy, &security_policy_20170210);
         EXPECT_EQUAL(config->security_policy->cipher_preferences, &cipher_preferences_20170210);
         EXPECT_EQUAL(config->security_policy->kem_preferences, &kem_preferences_null);
         EXPECT_EQUAL(config->security_policy->signature_preferences, &s2n_signature_preferences_20140601);
         EXPECT_EQUAL(config->security_policy->ecc_preferences, &s2n_ecc_preferences_20140601);
 
-        EXPECT_SUCCESS(s2n_config_set_cipher_preferences(config, "default_tls13"));
+        EXPECT_SUCCESS(s2n_config_set_security_policy(config, S2N_SECURITY_POLICY_DEFAULT_TLS13));
         EXPECT_EQUAL(config->security_policy, &security_policy_20190801);
         EXPECT_EQUAL(config->security_policy->cipher_preferences, &cipher_preferences_20190801);
         EXPECT_EQUAL(config->security_policy->kem_preferences, &kem_preferences_null);
         EXPECT_EQUAL(config->security_policy->signature_preferences, &s2n_signature_preferences_20200207);
         EXPECT_EQUAL(config->security_policy->ecc_preferences, &s2n_ecc_preferences_20200310);
 
-        EXPECT_SUCCESS(s2n_config_set_cipher_preferences(config, "20190801"));
+        EXPECT_SUCCESS(s2n_config_set_security_policy(config, S2N_SECURITY_POLICY_20190801));
         EXPECT_EQUAL(config->security_policy, &security_policy_20190801);
         EXPECT_EQUAL(config->security_policy->cipher_preferences, &cipher_preferences_20190801);
         EXPECT_EQUAL(config->security_policy->kem_preferences, &kem_preferences_null);
         EXPECT_EQUAL(config->security_policy->signature_preferences, &s2n_signature_preferences_20200207);
         EXPECT_EQUAL(config->security_policy->ecc_preferences, &s2n_ecc_preferences_20200310);
-
-        EXPECT_SUCCESS(s2n_config_set_cipher_preferences(config, "null"));
-        EXPECT_EQUAL(config->security_policy, &security_policy_null);
-        EXPECT_EQUAL(config->security_policy->cipher_preferences, &cipher_preferences_null);
-        EXPECT_EQUAL(config->security_policy->kem_preferences, &kem_preferences_null);
-        EXPECT_EQUAL(config->security_policy->signature_preferences, &s2n_signature_preferences_null);
-        EXPECT_EQUAL(config->security_policy->ecc_preferences, &s2n_ecc_preferences_null);
-
-        EXPECT_FAILURE(s2n_config_set_cipher_preferences(config, NULL));
-
-        EXPECT_FAILURE_WITH_ERRNO(s2n_config_set_cipher_preferences(config, "notathing"),
-                S2N_ERR_INVALID_SECURITY_POLICY);
 
         s2n_config_free(config);
     }
@@ -354,8 +342,46 @@ int main(int argc, char **argv)
         EXPECT_EQUAL(security_policy->signature_preferences, &s2n_signature_preferences_20200207);
         EXPECT_EQUAL(security_policy->ecc_preferences, &s2n_ecc_preferences_20200310);
 
-        EXPECT_FAILURE_WITH_ERRNO(s2n_connection_set_cipher_preferences(conn, "notathing"),
-                S2N_ERR_INVALID_SECURITY_POLICY);
+        s2n_config_free(config);
+        s2n_connection_free(conn);
+    }
+    {
+        struct s2n_config *config = s2n_config_new();
+
+        struct s2n_connection *conn = s2n_connection_new(S2N_CLIENT);
+        s2n_connection_set_config(conn, config);
+
+        EXPECT_SUCCESS(s2n_connection_set_security_policy(conn, S2N_SECURITY_POLICY_DEFAULT));
+        EXPECT_SUCCESS(s2n_connection_get_security_policy(conn, &security_policy));
+        EXPECT_EQUAL(security_policy, &security_policy_20170210);
+        EXPECT_EQUAL(security_policy->cipher_preferences, &cipher_preferences_20170210);
+        EXPECT_EQUAL(security_policy->kem_preferences, &kem_preferences_null);
+        EXPECT_EQUAL(security_policy->signature_preferences, &s2n_signature_preferences_20140601);
+        EXPECT_EQUAL(security_policy->ecc_preferences, &s2n_ecc_preferences_20140601);
+
+        EXPECT_SUCCESS(s2n_connection_set_security_policy(conn, S2N_SECURITY_POLICY_20170210));
+        EXPECT_SUCCESS(s2n_connection_get_security_policy(conn, &security_policy));
+        EXPECT_EQUAL(security_policy, &security_policy_20170210);
+        EXPECT_EQUAL(security_policy->cipher_preferences, &cipher_preferences_20170210);
+        EXPECT_EQUAL(security_policy->kem_preferences, &kem_preferences_null);
+        EXPECT_EQUAL(security_policy->signature_preferences, &s2n_signature_preferences_20140601);
+        EXPECT_EQUAL(security_policy->ecc_preferences, &s2n_ecc_preferences_20140601);
+
+        EXPECT_SUCCESS(s2n_connection_set_security_policy(conn, S2N_SECURITY_POLICY_DEFAULT_TLS13));
+        EXPECT_SUCCESS(s2n_connection_get_security_policy(conn, &security_policy));
+        EXPECT_EQUAL(security_policy, &security_policy_20190801);
+        EXPECT_EQUAL(security_policy->cipher_preferences, &cipher_preferences_20190801);
+        EXPECT_EQUAL(security_policy->kem_preferences, &kem_preferences_null);
+        EXPECT_EQUAL(security_policy->signature_preferences, &s2n_signature_preferences_20200207);
+        EXPECT_EQUAL(security_policy->ecc_preferences, &s2n_ecc_preferences_20200310);
+
+        EXPECT_SUCCESS(s2n_connection_set_security_policy(conn, S2N_SECURITY_POLICY_20190801));
+        EXPECT_SUCCESS(s2n_connection_get_security_policy(conn, &security_policy));
+        EXPECT_EQUAL(security_policy, &security_policy_20190801);
+        EXPECT_EQUAL(security_policy->cipher_preferences, &cipher_preferences_20190801);
+        EXPECT_EQUAL(security_policy->kem_preferences, &kem_preferences_null);
+        EXPECT_EQUAL(security_policy->signature_preferences, &s2n_signature_preferences_20200207);
+        EXPECT_EQUAL(security_policy->ecc_preferences, &s2n_ecc_preferences_20200310);
 
         s2n_config_free(config);
         s2n_connection_free(conn);

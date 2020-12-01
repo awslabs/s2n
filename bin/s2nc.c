@@ -119,7 +119,12 @@ static void setup_s2n_config(struct s2n_config *config, const char *cipher_prefs
         exit(1);
     }
 
-    GUARD_EXIT(s2n_config_set_cipher_preferences(config, cipher_prefs), "Error setting cipher prefs");
+    const struct s2n_security_policy *policy;
+    /* Using unsupported function to prevent changing the s2nc/s2nd interface for integration tests */
+    /* https://github.com/awslabs/s2n/issues/2378 */
+    GUARD_EXIT(s2n_find_security_policy_from_version(cipher_prefs, &policy), "Error finding security policy");
+
+    GUARD_EXIT(s2n_config_set_security_policy(config, policy), "Error setting security policy");
 
     GUARD_EXIT(s2n_config_set_status_request_type(config, type), "OCSP validation is not supported by the linked libCrypto implementation. It cannot be set.");
 
