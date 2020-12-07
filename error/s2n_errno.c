@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <openssl/err.h>
 #include "error/s2n_errno.h"
 
 #include <s2n.h>
@@ -29,6 +30,7 @@
 #endif
 
 __thread int s2n_errno;
+__thread unsigned long s2n_libcrypto_error;
 __thread const char *s2n_debug_str;
 
 static const char *no_such_language = "Language is not supported for error translation";
@@ -236,12 +238,20 @@ static const char *no_such_error = "Internal s2n error";
     ERR_ENTRY(S2N_ERR_ASYNC_ALREADY_APPLIED, "Async operation was already applied to connection, cannot apply it again") \
     ERR_ENTRY(S2N_ERR_INVALID_HELLO_RETRY, "Invalid hello retry request") \
     ERR_ENTRY(S2N_ERR_INVALID_STATE, "Invalid state, this is the result of invalid use of an API. Check the API documentation for the function that raised this error for more info.") \
-    ERR_ENTRY(S2N_ERR_UNSUPPORTED_WITH_QUIC, "Functionality not supported when running with QUIC support enabled") \
+    ERR_ENTRY(S2N_ERR_LIBCRYPTO, "Error reported by underlying cryptographic implementation.") \
+    ERR_ENTRY(S2N_ERR_UNSUPPORTED_WITH_QUIC, "Functionality not supported when running with QUIC support enabled")
 
 /* clang-format on */
 
 #define ERR_STR_CASE(ERR, str) case ERR: return str;
 #define ERR_NAME_CASE(ERR, str) case ERR: return #ERR;
+
+S2N_API
+void s2n_clear_error()
+{
+    s2n_errno = S2N_ERR_T_OK;
+    s2n_libcrypto_error = 0;
+}
 
 const char *s2n_strerror(int error, const char *lang)
 {
@@ -320,6 +330,15 @@ int s2n_error_get_type(int error)
     return (error >> S2N_ERR_NUM_VALUE_BITS);
 }
 
+int s2n_save_crypto_error()
+{
+    s2n_libcrypto_error = ERR_peek_last_error();
+    if (s2n_libcrypto_error != 0) {
+      ERR_clear_error();
+    }
+
+    return S2N_SUCCESS;
+}
 
 /* https://www.gnu.org/software/libc/manual/html_node/Backtraces.html */
 static bool s_s2n_stack_traces_enabled = false;

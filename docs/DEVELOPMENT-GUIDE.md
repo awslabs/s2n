@@ -138,6 +138,20 @@ BAIL(S2N_ERR_BAD_MESSAGE);
 
 the macro will set s2n_errno correctly, as well as some useful debug strings, and return `S2N_RESULT_ERROR`.
 
+#### Crypto error handling
+
+The cryptography libraries used by s2n have their own error state which s2n needs to manage as well.
+All error handling for results from a cryptographic library must include one of the `OSSL` macros.
+There are three different ways to do this:
+
+* You can manually assemble an OSSL to S2N_RESULT macro with a GUARD macro (Preferred).
+  * ```GUARD_AS_POSIX(OSSL_POSIX(EVP_example_method_name_here()));```
+  * ```GUARD_AS_RESULT(OSSL_PTR_WITH(EVP_PKEY_new(), S2N_ERR_NOMEM));```
+  
+  This lets you use one macro pick to check a return value or pointer and the other to select the return type for the containing method.
+* You can use a `GUARD_*_OSSL` macro directly. (This is equivalant the prior constructions but less flexible.)
+* You can use an if statement for a more complicated check and then call an `OSSL_*_ERROR` macro set the error code and immediately return.
+
 ### Safety checking
 
 [utils/s2n_safety.h](https://github.com/awslabs/s2n/blob/main/utils/s2n_safety.h) provides several more convenience macros intended to make safety and bounds checking easier. There are checked versions of memcpy (`CHECKED_MEMCPY`) and memset (`CHECKED_MEMSET`), as well as predicate testers like `ENSURE`, `ENSURE_GTE`, `ENSURE_INCLUSIVE_RANGE`, `ENSURE_EXCLUSIVE_RANGE` for performing simple comparisons in a systematic, error-handled, way.
@@ -430,4 +444,3 @@ We are happy to accept contributions to s2n. We suggest the following general pr
 * When you're ready, and when all tests are passing, create a pull request to the master awslabs s2n repository.
 * All changes to s2n go through code review and legal review. All submissions and contributions are made under the terms of the Apache Software License 2.0. For larger contributions, we may ask you to sign a contributor license agreement.
 * s2n undergoes periodic government and commercial security analyses, including code audits and penetration tests. To participate in these analyses, we may ask you to sign a Non-Disclosure Agreement.
-

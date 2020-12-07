@@ -376,7 +376,7 @@ if (s2n_config_set_cipher_preferences(config, prefs) < 0) {
 }
 ```
 
-**NOTE**: To avoid possible confusion, s2n_errno should be cleared after processing an error: `s2n_errno = S2N_ERR_T_OK`
+**NOTE**: To avoid possible confusion, s2n_errno should be cleared after processing an error: `s2n_clear_error()`
 
 ### Stacktraces
 s2n has an mechanism to capture stacktraces when errors occur.
