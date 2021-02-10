@@ -17,33 +17,30 @@ set -ex
 pushd "$(pwd)"
 
 usage() {
-    echo "install_openssl_1_1_1.sh build_dir install_dir os_name"
+    echo "install_openssl_1_1_1.sh build_dir install_dir [release_name]"
     exit 1
 }
 
-if [ "$#" -ne "3" ]; then
+if [ "$#" -lt "2" ]; then
     usage
 fi
 
 BUILD_DIR=$1
 INSTALL_DIR=$2
-OS_NAME=$3
 source codebuild/bin/jobs.sh
-RELEASE=1_1_1g
+
+# Default to the latest 1.1.1 release if user didn't provide anything.
+RELEASE=${3:-'1.1.1-latest'}
 
 cd "$BUILD_DIR"
-curl --retry 3 -L https://github.com/openssl/openssl/archive/OpenSSL_${RELEASE}.zip --output OpenSSL_${RELEASE}.zip
-unzip OpenSSL_${RELEASE}.zip
-cd openssl-OpenSSL_${RELEASE}
+curl --retry 3 -L https://www.openssl.org/source/openssl-${RELEASE}.tar.gz --output OpenSSL_${RELEASE}.tar.gz
+# Need to do this for cases where the untar'd directory name is not trivially predictable.
+mkdir -p OpenSSL_${RELEASE}
+tar xzf OpenSSL_${RELEASE}.tar.gz -C OpenSSL_${RELEASE} --strip-components 1
+cd OpenSSL_${RELEASE}
 
-if [ "$OS_NAME" == "linux" ]; then
-    CONFIGURE="./config -d"
-elif [ "$OS_NAME" == "osx" ]; then
-    CONFIGURE="./Configure darwin64-x86_64-cc"
-else
-    echo "Invalid platform! $OS_NAME"
-    usage
-fi
+# This should work across all platforms we support.
+CONFIGURE="./config -d"
 
 # Use g3 to get debug symbols in libcrypto to chase memory leaks
 $CONFIGURE -g3 -fPIC              \
