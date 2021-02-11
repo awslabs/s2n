@@ -77,6 +77,14 @@ int s2n_stuffer_init(struct s2n_stuffer *stuffer, struct s2n_blob *in)
     return S2N_SUCCESS;
 }
 
+int s2n_stuffer_init_with_data(struct s2n_stuffer *stuffer, struct s2n_blob *in)
+{
+    GUARD(s2n_stuffer_init(stuffer, in));
+    stuffer->write_cursor = stuffer->high_water_mark = in->size;
+    POSTCONDITION_POSIX(s2n_stuffer_is_valid(stuffer));
+    return S2N_SUCCESS;
+}
+
 int s2n_stuffer_alloc(struct s2n_stuffer *stuffer, const uint32_t size)
 {
     notnull_check(stuffer);

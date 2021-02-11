@@ -64,6 +64,7 @@ extern S2N_RESULT s2n_stuffer_validate(const struct s2n_stuffer* stuffer);
 
 /* Initialize and destroying stuffers */
 extern int s2n_stuffer_init(struct s2n_stuffer *stuffer, struct s2n_blob *in);
+extern int s2n_stuffer_init_with_data(struct s2n_stuffer *stuffer, struct s2n_blob *in);
 extern int s2n_stuffer_alloc(struct s2n_stuffer *stuffer, const uint32_t size);
 extern int s2n_stuffer_growable_alloc(struct s2n_stuffer *stuffer, const uint32_t size);
 extern int s2n_stuffer_free(struct s2n_stuffer *stuffer);
