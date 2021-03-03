@@ -29,6 +29,10 @@
 
 #include "pq-crypto/s2n_pq.h"
 
+#include <pthread.h>
+
+static pthread_once_t s2n_globals_initialized = PTHREAD_ONCE_INIT;
+
 static void s2n_cleanup_atexit(void);
 
 unsigned long s2n_get_openssl_version(void)
@@ -36,21 +40,41 @@ unsigned long s2n_get_openssl_version(void)
     return OPENSSL_VERSION_NUMBER;
 }
 
+/* Global process state initialization. */
+static void s2n_init_global(void)
+{
+    GUARD_POSIX_VOID(s2n_fips_init());
+    GUARD_POSIX_VOID(s2n_mem_init());
+    GUARD_POSIX_VOID(s2n_cipher_suites_init());
+    GUARD_POSIX_VOID(s2n_security_policies_init());
+    GUARD_POSIX_VOID(s2n_config_defaults_init());
+    GUARD_POSIX_VOID(s2n_extension_type_init());
+    GUARD_RESULT_VOID(s2n_pq_init());
+}
+
+/* Per thread initialization. */
+static int s2n_init_thread(void)
+{
+    GUARD_AS_POSIX(s2n_rand_init());
+    return 0;
+}
+
 int s2n_init(void)
 {
-    GUARD_POSIX(s2n_fips_init());
-    GUARD_POSIX(s2n_mem_init());
-    GUARD_AS_POSIX(s2n_rand_init());
-    GUARD_POSIX(s2n_cipher_suites_init());
-    GUARD_POSIX(s2n_security_policies_init());
-    GUARD_POSIX(s2n_config_defaults_init());
-    GUARD_POSIX(s2n_extension_type_init());
-    GUARD_AS_POSIX(s2n_pq_init());
+    // Initialize per process state, once.
+    pthread_once(&s2n_globals_initialized, s2n_init_global);
+
+    // Bail now if any global library initialization failed.
+    if (s2n_errno != S2N_ERR_OK) {
+        return -1;
+    }
 
     S2N_ERROR_IF(atexit(s2n_cleanup_atexit) != 0, S2N_ERR_ATEXIT);
 
+    GUARD_POSIX(s2n_init_thread());
+
     if (getenv("S2N_PRINT_STACKTRACE")) {
-      s2n_stack_traces_enabled_set(true);
+        s2n_stack_traces_enabled_set(true);
     }
 
     return 0;
@@ -61,6 +85,9 @@ int s2n_cleanup(void)
     /* s2n_cleanup is supposed to be called from each thread before exiting,
      * so ensure that whatever clean ups we have here are thread safe */
     GUARD_AS_POSIX(s2n_rand_cleanup_thread());
+    /* This isn't strictly necessary as it isn't currently possible to call s2n_init() again after a call to
+     * s2n_cleanup().
+     */
     return 0;
 }
 
