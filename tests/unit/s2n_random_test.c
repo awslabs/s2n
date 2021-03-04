@@ -311,5 +311,42 @@ int main(int argc, char **argv)
         }
     }
 
+    uint64_t r;
+
+    /* Simulate 1,000,000 rolls of a dice */
+    for (int i = 0; i < 1000000; i++) {
+        EXPECT_OK(s2n_public_random(6, &r));
+        EXPECT_TRUE(r <= 5);
+    }
+
+    /* Pick an extremely high bound */
+    for (int i = 0; i < 1000000; i++) {
+        EXPECT_OK(s2n_public_random(INT64_MAX, &r));
+        EXPECT_TRUE(r <= INT64_MAX);
+    }
+
+    /* Internally s2n_public_random branches when it chooses
+    ** a random number with a modulus less than its bound, and
+    ** branches again when that modulus is less than
+    ** ((2^64 - bound) % bound).
+    **
+    ** To get good coverage we want to pick a value that maximizes
+    ** '((2^64 - bound) % bound)'. With bound = 6148914691236517206
+    ** ((2^64 / 3) + 1) we get a value of 6148914691236517204 for
+    ** the second piece. This maximizes the odds of our random
+    ** function taking the branches that we want to cover.
+    **
+    **/
+    for (int i = 0; i < 1000000; i++) {
+        EXPECT_OK(s2n_public_random(6148914691236517206, &r));
+        EXPECT_TRUE(r <= 6148914691236517206);
+    }
+
+    /* 0 should fail */
+    EXPECT_ERROR(s2n_public_random(0, &r));
+
+    /* -1 should fail */
+    EXPECT_ERROR(s2n_public_random(-1, &r));
+
     END_TEST();
 }
