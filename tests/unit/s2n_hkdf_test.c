@@ -521,13 +521,14 @@ int main(int argc, char **argv)
 {
     struct s2n_hmac_state hmac;
 
-    uint8_t prk_pad[MAX_PSEUDO_RAND_KEY_SIZE];
+    uint8_t prk_pad[MAX_PSEUDO_RAND_KEY_SIZE] = { 0 };
     struct s2n_blob prk_result = { .data = prk_pad, .size = sizeof(prk_pad) };
 
-    uint8_t output_pad[MAX_OUTPUT_SIZE];
+    uint8_t output_pad[MAX_OUTPUT_SIZE] = { 0 };
     struct s2n_blob out_result = { .data = output_pad, .size = sizeof(output_pad) };
 
-    struct s2n_blob in_key_blob, salt_blob, info_blob, actual_prk_blob, actual_output_blob;
+    struct s2n_blob in_key_blob = { 0 }, salt_blob = { 0 }, info_blob = { 0 };
+    struct s2n_blob actual_prk_blob = { 0 }, actual_output_blob = { 0 };
 
     BEGIN_TEST();
     EXPECT_SUCCESS(s2n_disable_tls13());
@@ -554,7 +555,7 @@ int main(int argc, char **argv)
      * SHA1 (20) by the maximum number of rounds allowed for HKDF (255),
      * then adding 1
      */
-    uint8_t error_out_pad[5101];
+    uint8_t error_out_pad[5101] = { 0 };
     struct s2n_blob error_out = { .data = error_out_pad, .size = sizeof(error_out_pad) };
     struct s2n_blob zero_out = { .data = output_pad, .size = 0 };
 

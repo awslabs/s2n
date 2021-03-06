@@ -24,8 +24,8 @@ int main(int argc, char **argv)
 {
     char c;
     uint32_t skipped = 0;
-    struct s2n_stuffer stuffer, token;
-    struct s2n_blob pad_blob, token_blob;
+    struct s2n_stuffer stuffer = { 0 }, token = { 0 };
+    struct s2n_blob pad_blob = { 0 }, token_blob = { 0 };
     char text[] = "    This is some text\r\n\tmore text";
     char fields[] = "one,two,three";
     uint8_t pad[1024];

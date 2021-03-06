@@ -470,12 +470,12 @@ static int s2n_sslv3_server_finished(struct s2n_connection *conn)
 
 int s2n_prf_client_finished(struct s2n_connection *conn)
 {
-    struct s2n_blob master_secret, md5, sha;
+    struct s2n_blob master_secret = { 0 }, md5 = { 0 }, sha = { 0 };
     uint8_t md5_digest[MD5_DIGEST_LENGTH];
     uint8_t sha_digest[SHA384_DIGEST_LENGTH];
     uint8_t client_finished_label[] = "client finished";
-    struct s2n_blob client_finished = {0};
-    struct s2n_blob label = {0};
+    struct s2n_blob client_finished = { 0 };
+    struct s2n_blob label = { 0 };
 
     if (conn->actual_protocol_version == S2N_SSLv3) {
         return s2n_sslv3_client_finished(conn);
@@ -523,12 +523,12 @@ int s2n_prf_client_finished(struct s2n_connection *conn)
 
 int s2n_prf_server_finished(struct s2n_connection *conn)
 {
-    struct s2n_blob master_secret, md5, sha;
+    struct s2n_blob master_secret = { 0 }, md5 = { 0 }, sha = { 0 };
     uint8_t md5_digest[MD5_DIGEST_LENGTH];
     uint8_t sha_digest[SHA384_DIGEST_LENGTH];
     uint8_t server_finished_label[] = "server finished";
-    struct s2n_blob server_finished = {0};
-    struct s2n_blob label = {0};
+    struct s2n_blob server_finished = { 0 };
+    struct s2n_blob label = { 0 };
 
     if (conn->actual_protocol_version == S2N_SSLv3) {
         return s2n_sslv3_server_finished(conn);
@@ -611,7 +611,7 @@ int s2n_prf_key_expansion(struct s2n_connection *conn)
     struct s2n_blob client_random = {.data = conn->secure.client_random,.size = sizeof(conn->secure.client_random) };
     struct s2n_blob server_random = {.data = conn->secure.server_random,.size = sizeof(conn->secure.server_random) };
     struct s2n_blob master_secret = {.data = conn->secure.master_secret,.size = sizeof(conn->secure.master_secret) };
-    struct s2n_blob label, out;
+    struct s2n_blob label = { 0 }, out = { 0 };
     uint8_t key_expansion_label[] = "key expansion";
     uint8_t key_block[S2N_MAX_KEY_BLOCK_LEN];
 

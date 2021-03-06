@@ -73,7 +73,7 @@ static int s2n_test_tls13_handle_secrets(s2n_mode mode, uint8_t version, message
 
         s2n_tls13_connection_keys(client_secrets, conn);
 
-        DEFER_CLEANUP(struct s2n_blob empty_secret, s2n_free);
+        DEFER_CLEANUP(struct s2n_blob empty_secret = { 0 }, s2n_free);
         GUARD(s2n_alloc(&empty_secret, client_secrets.size));
         GUARD(s2n_blob_zero(&empty_secret));
         eq_check(memcmp(empty_secret.data, client_secrets.extract_secret.data, client_secrets.extract_secret.size), 0);

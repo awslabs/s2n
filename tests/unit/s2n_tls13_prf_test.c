@@ -62,10 +62,10 @@ int main(int argc, char **argv)
 
     uint8_t digest_buf[SHA256_DIGEST_LENGTH];
     uint8_t secret_buf[SHA256_DIGEST_LENGTH];
-    struct s2n_blob digest;
-    struct s2n_blob secret;
+    struct s2n_blob digest = { 0 };
+    struct s2n_blob secret = { 0 };
 
-    struct s2n_hash_state transcript_hash, transcript_hash_snapshot;
+    struct s2n_hash_state transcript_hash = { 0 }, transcript_hash_snapshot = { 0 };
 
     BEGIN_TEST();
     EXPECT_SUCCESS(s2n_disable_tls13());

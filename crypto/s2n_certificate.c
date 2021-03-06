@@ -58,6 +58,7 @@ int s2n_create_cert_chain_from_stuffer(struct s2n_cert_chain *cert_chain_out, st
         struct s2n_blob mem = {0};
         GUARD(s2n_alloc(&mem, sizeof(struct s2n_cert)));
         new_node = (struct s2n_cert *)(void *)mem.data;
+        new_node->raw = (struct s2n_blob){ 0 };
 
         if (s2n_alloc(&new_node->raw, s2n_stuffer_data_available(&cert_out_stuffer)) != S2N_SUCCESS) {
             GUARD(s2n_free(&mem));
@@ -152,8 +153,8 @@ int s2n_cert_chain_and_key_set_sct_list(struct s2n_cert_chain_and_key *chain_and
 
 struct s2n_cert_chain_and_key *s2n_cert_chain_and_key_new(void)
 {
-    struct s2n_cert_chain_and_key *chain_and_key;
-    struct s2n_blob chain_and_key_mem, cert_chain_mem, pkey_mem;
+    struct s2n_cert_chain_and_key *chain_and_key = NULL;
+    struct s2n_blob chain_and_key_mem = { 0 }, cert_chain_mem = { 0 }, pkey_mem = { 0 };
 
     GUARD_PTR(s2n_alloc(&chain_and_key_mem, sizeof(struct s2n_cert_chain_and_key)));
     chain_and_key = (struct s2n_cert_chain_and_key *)(void *)chain_and_key_mem.data;

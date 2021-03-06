@@ -154,7 +154,7 @@ int s2n_tls13_derive_binder_key(struct s2n_tls13_keys *keys, struct s2n_psk *psk
             &psk->secret, early_secret));
 
     /* Choose the correct label for the psk type */
-    const struct s2n_blob *label_blob;
+    const struct s2n_blob *label_blob = { 0 };
     if (psk->type == S2N_PSK_TYPE_EXTERNAL) {
         label_blob = &s2n_tls13_label_external_psk_binder_key;
     } else {
@@ -256,7 +256,7 @@ int s2n_tls13_derive_application_secret(struct s2n_tls13_keys *keys, struct s2n_
     notnull_check(hashes);
     notnull_check(secret_blob);
 
-    const struct s2n_blob *label_blob;
+    const struct s2n_blob *label_blob = { 0 };
     if (mode == S2N_CLIENT) {
         label_blob = &s2n_tls13_label_client_application_traffic_secret;
     } else {

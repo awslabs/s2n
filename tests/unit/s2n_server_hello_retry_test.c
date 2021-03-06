@@ -292,7 +292,7 @@ int main(int argc, char **argv)
 
         s2n_tls13_connection_keys(keys, conn);
         uint8_t hash_digest_length = keys.size;
-        struct s2n_blob compare_blob;
+        struct s2n_blob compare_blob = { 0 };
 
         struct s2n_hash_state hash_state, client_hello1_hash;
         GUARD(s2n_handshake_get_hash_state(conn, keys.hash_algorithm, &hash_state));

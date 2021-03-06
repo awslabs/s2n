@@ -351,7 +351,7 @@ int s2n_record_writev(struct s2n_connection *conn, uint8_t content_type, const s
                  * NOTE: We can't use the same random IV blob as both the initial block and IV since it will result in:
                  * AES(Key, XOR(random_iv, random_iv)) == AES(Key, 0), which will be shared by all records in this session.
                  */
-                struct s2n_blob explicit_iv_placeholder;
+                struct s2n_blob explicit_iv_placeholder = { 0 };
                 uint8_t zero_block[S2N_TLS_MAX_IV_LEN] = { 0 };
                 GUARD(s2n_blob_init(&explicit_iv_placeholder, zero_block, block_size));
                 GUARD_AS_POSIX(s2n_get_public_random_data(&explicit_iv_placeholder));

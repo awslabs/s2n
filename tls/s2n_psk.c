@@ -383,7 +383,7 @@ static S2N_RESULT s2n_psk_write_binder(struct s2n_connection *conn, struct s2n_p
 {
     ENSURE_REF(binder_hash);
 
-    struct s2n_blob binder;
+    struct s2n_blob binder = { 0 };
     uint8_t binder_data[S2N_TLS13_SECRET_MAX_LEN] = { 0 };
     GUARD_AS_RESULT(s2n_blob_init(&binder, binder_data, binder_hash->size));
 

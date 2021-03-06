@@ -393,7 +393,7 @@ int main(int argc, char **argv)
         GUARD(s2n_hash_digest(&server_hash, server_digest_out, hash_digest_length));
         GUARD(s2n_hash_free(&server_hash));
 
-        struct s2n_blob server_blob;
+        struct s2n_blob server_blob = { 0 };
         EXPECT_SUCCESS(s2n_blob_init(&server_blob, server_digest_out, hash_digest_length));
 
         EXPECT_SUCCESS(s2n_stuffer_wipe(&client_conn->handshake.io));
@@ -417,7 +417,7 @@ int main(int argc, char **argv)
         GUARD(s2n_hash_digest(&client_hash, client_digest_out, hash_digest_length));
         GUARD(s2n_hash_free(&client_hash));
 
-        struct s2n_blob client_blob;
+        struct s2n_blob client_blob = { 0 };
         EXPECT_SUCCESS(s2n_blob_init(&client_blob, client_digest_out, hash_digest_length));
 
         /* Test that the transcript hash recreated MUST be the same on the server and client side */

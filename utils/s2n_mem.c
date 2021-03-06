@@ -153,6 +153,7 @@ int s2n_alloc(struct s2n_blob *b, uint32_t size)
 {
     POSIX_ENSURE(initialized, S2N_ERR_NOT_INITIALIZED);
     notnull_check(b);
+    POSIX_ENSURE(b->allocated == 0, S2N_ERR_ALLOC);
     const struct s2n_blob temp = {0};
     *b = temp;
     GUARD(s2n_realloc(b, size));
